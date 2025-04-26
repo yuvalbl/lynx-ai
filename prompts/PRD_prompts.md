@@ -10,12 +10,13 @@ This document contains prompts for implementing the AI-Powered End-to-End Test G
 Create the infrastructure for an AI-powered end-to-end test generation system with TypeScript, Playwright, and MCP Playwright Server. Set up the following:
 
 1. Create a package.json file with:
-   - TypeScript 4.x+ and nodemon
+   - TypeScript 4.x+ and ts-node-dev
    - Playwright dependencies
    - Jest for unit testing
    - ESLint with TypeScript support
    - Prettier for code formatting
    - Appropriate scripts for building, testing, and linting
+  Make use TypeScript in dev mode (using ts-node-dev)
 
 2. Create a basic project structure with:
    - src/ directory for source code
@@ -31,21 +32,10 @@ Create the infrastructure for an AI-powered end-to-end test generation system wi
    - src/common/ (for shared types and utilities)
 
 4. Implement shared interfaces in src/common/types.ts as defined in the PRD:
-   - CommonOptions (with timeoutMs and retryCount)
+   - CommonOptions
    - ErrorInfo
    - OperationResult
-   - TestStep interface with:
-     * id (unique identifier)
-     * description (human-readable description)
-     * action (framework-agnostic operation type)
-     * selector (element targeting)
-     * value (action input value)
-     * timeout (step-specific timeout)
-     * waitFor (wait conditions)
-     * isLastStep (control flow flag)
-     * context (for debugging and self-healing)
-     * maxRetries (retry strategy)
-   - Other shared interfaces
+   - TestStep
 
 5. Create a simple logging mechanism in src/common/logger.ts
 
@@ -64,7 +54,7 @@ Include a README.md in the root directory with:
 - How to run tests
 - How to use the system
 
-Add a simple script to validate the infrastructure setup that can be run with 'npm run validate-setup'
+Add a simple script to validate TS files can be run in dev mode - run 'npm run dev' to test it
 ```
 
 ### Infrastructure Tests Prompt
@@ -72,19 +62,10 @@ Add a simple script to validate the infrastructure setup that can be run with 'n
 ```
 Create comprehensive tests for the infrastructure setup of our AI-powered end-to-end test generation system. Implement the following:
 
-1. Unit tests for shared interfaces and types in src/common/types.ts:
-   - Test type validation
-   - Test interface extensions work as expected
-   - Test default values where applicable
-
-2. Unit tests for the logging mechanism in src/common/logger.ts:
-   - Test different log levels
-   - Test log formatting
-   - Test error logging
-
-3. Integration test to validate the entire infrastructure:
+1. Integration test to validate the entire infrastructure:
    - Verify directory structure
    - Validate configuration files
+   - Ensure script
    - Ensure imports work correctly between modules
    - Verify build process completes successfully
 
