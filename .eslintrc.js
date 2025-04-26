@@ -17,4 +17,5 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     'max-len': ['error', { code: 100, ignoreComments: true, ignoreStrings: true }],
   },
+  ignorePatterns: ['jest.config.js'],
 }; 
