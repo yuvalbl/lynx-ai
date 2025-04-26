@@ -26,7 +26,7 @@ graph TD
     A[TestScenario] --> B(ScenarioInputValidator);
     B -- Valid Scenario --> Orch(ScenarioParserOrchestrator);
 
-    subgraph Step Loop (Managed by Orchestrator)
+    subgraph Step Loop [Managed by Orchestrator]
         direction LR
         State[Current DOM State] --> PF(PromptFormatter);
         Action[NL Action String] --> PF;
@@ -50,39 +50,57 @@ graph TD
 
 ```
 src/
-├── scenario-parser/                 # <-- Module located inside src/
-│   ├── scenario-parser.service.ts       # Main entry point & Orchestrator
-│   ├── validator.ts                     # ScenarioInputValidator logic
-│   ├── mcp-client.ts                    # MCPClient logic
-│   ├── result-processor.ts              # MCPResultProcessor logic
-│   ├── prompt-formatter.ts              # PromptFormatter logic
-│   ├── nl-translator.ts                 # NLToActionTranslator logic (LLM Interaction)
-│   ├── command-generator.ts             # MCPCommandGenerator logic
-│   ├── interfaces/
-│   │   ├── index.ts                     # Barrel file for interfaces
-│   │   ├── common.types.ts              # Common types (ErrorInfo, OperationResult, etc.)
-│   │   ├── scenario.types.ts            # TestScenario, ParserResult
-│   │   ├── test-step.types.ts           # TestStep definition
-│   │   ├── mcp.types.ts                 # Types related to MCP interaction (TBD based on API)
-│   │   └── internal.types.ts            # IntermediateStep, SerializableDOMNode, BrowserStepContext
-│   └── utils/
-│       └── index.ts                     # Utility functions (e.g., DOM serialization)
-│   ├── tests/
-│   │   └── ... (Unit tests for each component)
+├── scenario-parser/
+│   ├── scenario-parser.service.ts       # Orchestrator - Main logic
+│   ├── orchestrator-helpers.ts          # Optional: Helpers for the orchestrator if it gets too large
+│   ├── components/                      # Directory for component modules
+│   │   ├── validator/
+│   │   │   ├── index.ts                 # Exports
+│   │   │   └── validator.logic.ts       # Validation implementation
+│   │   ├── mcp-client/
+│   │   │   ├── index.ts
+│   │   │   ├── mcp-client.logic.ts      # Core request/response logic
+│   │   │   └── mcp-retry.logic.ts       # Handles retry policy (example split)
+│   │   │   └── mcp-error-handler.ts     # Handles error diagnostics (example split)
+│   │   ├── result-processor/
+│   │   │   ├── index.ts
+│   │   │   ├── result-processor.logic.ts # Handles TestStep creation
+│   │   │   ├── dom-parser.ts            # Parses raw MCP snapshot -> initial tree
+│   │   │   └── dom-filter.ts            # Filters initial tree -> minimized tree
+│   │   ├── prompt-formatter/            # << Component directory
+│   │   │   ├── index.ts
+│   │   │   ├── prompt-formatter.logic.ts # Logic to load templates, format data
+│   │   │   ├── dom-serializer.ts        # Converts minimized tree to string (if complex, could be in utils)
+│   │   │   └── prompts/                 # << Prompts moved inside component
+│   │   │       ├── index.ts             # Optional: Export prompt strings/functions
+│   │   │       └── intermediate-step-generation.prompt.md # Example template file
+│   │   │       └── ...                  # Other potential prompts if needed
+│   │   ├── nl-translator/
+│   │   │   ├── index.ts
+│   │   │   └── nl-translator.logic.ts   # LLM API interaction & function parsing
+│   │   └── command-generator/
+│   │       ├── index.ts
+│   │       └── command-generator.logic.ts # MCP command generation logic
+│   ├── interfaces/                      # Shared interfaces (unchanged)
+│   │   └── ...
+│   ├── utils/                           # Shared utilities (keep small or split)
+│   │   └── index.ts
+│   ├── tests/                           # Test structure mirrors components/
+│   │   └── ...
 │   ├── README.md
-│   └── scenario-parser-tech-spec.md # This file
-├── ... (Other top-level src modules like Marathon Engine, Code Converter)
+│   └── scenario-parser-tech-spec.md
+├── ... (Other top-level src modules)
 ```
 
 ## 5. Component Descriptions
 
-*   **`ScenarioInputValidator` (`validator.ts`):** Validates the structure and basic constraints of the input `TestScenario` object.
-*   **`MCPClient` (`mcp-client.ts`):** Handles all HTTP/WebSocket communication with the MCP Playwright Server. Sends commands, receives raw responses/snapshots/errors. Implements retry logic for transient network issues. Requests diagnostics (screenshot, DOM) on error.
-*   **`MCPResultProcessor` (`result-processor.ts`):** Parses raw data from `MCPClient`. Builds the initial DOM tree representation. Filters the DOM tree to keep only visible/interactive elements. Constructs validated `TestStep` objects from successful results.
-*   **`PromptFormatter` (`prompt-formatter.ts`):** Constructs the precise prompt payload for the LLM, including system instructions, action-specific guidance, serialized minimized DOM, URL (if needed), and the function definition for `IntermediateStep`.
-*   **`NLToActionTranslator` (`nl-translator.ts`):** Manages the LLM API call using the formatted prompt. Expects and parses the structured `IntermediateStep` output via function calling. Handles LLM API errors.
-*   **`MCPCommandGenerator` (`command-generator.ts`):** Translates the `IntermediateStep` from the LLM into specific MCP Server command JSON objects.
-*   **`ScenarioParserOrchestrator` (`scenario-parser.service.ts`):** The main service class. Manages the overall step-by-step flow, maintains the current browser state (DOM representation), coordinates calls to other components, handles errors, and aggregates the final `ParserResult`.
+*   **`ScenarioInputValidator` (`components/validator/validator.logic.ts`):** Validates the structure and basic constraints of the input `TestScenario` object.
+*   **`MCPClient` (`components/mcp-client/mcp-client.logic.ts`):** Handles all HTTP/WebSocket communication with the MCP Playwright Server. Sends commands, receives raw responses/snapshots/errors. Uses helpers (`mcp-retry.logic.ts`, `mcp-error-handler.ts`) for retry logic and error diagnostics.
+*   **`MCPResultProcessor` (`components/result-processor/result-processor.logic.ts`):** Creates validated `TestStep` objects from successful results. Uses helpers (`dom-parser.ts`, `dom-filter.ts`) to parse raw MCP snapshot data and filter the DOM tree.
+*   **`PromptFormatter` (`components/prompt-formatter/prompt-formatter.logic.ts`):** Loads prompt templates from its local `prompts/` directory. Serializes the minimized DOM (using `dom-serializer.ts` or utils). Injects context (DOM, action, URL) into the template. Constructs the final `LLMPromptPayload` including the function definition for `IntermediateStep`.
+*   **`NLToActionTranslator` (`components/nl-translator/nl-translator.logic.ts`):** Receives the `LLMPromptPayload`. Manages the LLM API call, expecting the `IntermediateStep` function call. Parses the LLM response to extract the structured `IntermediateStep` object. Handles LLM API errors.
+*   **`MCPCommandGenerator` (`components/command-generator/command-generator.logic.ts`):** Translates the `IntermediateStep` from the LLM into specific MCP Server command JSON objects.
+*   **`ScenarioParserOrchestrator` (`scenario-parser.service.ts`):** The main service class. Manages the overall step-by-step flow, maintains the current browser state (DOM representation), coordinates calls to other components (using their `index.ts` exports), handles errors, and aggregates the final `ParserResult`. Uses `orchestrator-helpers.ts` if needed.
 
 ## 6. Key Interfaces
 
@@ -216,15 +234,21 @@ export interface IntermediateStep {
 
 // Represents a node in the filtered, serializable DOM tree passed to the LLM
 export interface SerializableDOMNode {
-  tag: string;
-  attributes: Record<string, string>; // Filtered attributes (id, class, data-*, aria-*, role)
-  text: string; // Direct text content, potentially truncated
-  mcpSelector: string; // The stable selector/identifier provided by MCP for this node // TBD: Needs confirmation from MCP Spec
-  children: SerializableDOMNode[];
+  tag: string; // e.g., 'button', 'input', 'a', 'div'
+  attributes: Record<string, string>; // Key-value map of *relevant* attributes (id, class, data-*, aria-*, role, type, placeholder, value, etc.)
+  text: string; // Direct text content, potentially truncated or concatenated from children text nodes
+  mcpSelector: string; // The stable selector/identifier provided by MCP for this node (e.g., XPath, unique attribute)
+                       // TBD: Exact format depends on MCP Server API capabilities.
+  children: SerializableDOMNode[]; // Child nodes that are also visible/interactive
   isVisible: boolean; // Based on MCP hint
-  isInteractive: boolean; // Based on MCP hint
+  isInteractive: boolean; // Based on MCP hint (e.g., clickable, focusable, inputtable)
 
-  // Method to convert node and children to string for LLM prompt
+  /**
+   * Converts this node and its relevant children into a concise string
+   * representation suitable for inclusion in an LLM prompt.
+   * Example: `[xpath-selector]<button id='login' class='btn'>Login</button>`
+   * @returns {string} String representation of the node.
+   */
   toString(): string;
 }
 
@@ -238,85 +262,105 @@ export interface BrowserStepContext {
 
 ## 7. Core Function Signatures
 
-*(Illustrative examples, not exhaustive)*
+*(Illustrative examples, reflecting potential splits and updated paths)*
 
 **`scenario-parser.service.ts`**
 
 ```typescript
 import { TestScenario, ParserResult } from './interfaces';
+// Import component facades/main functions from './components/...'
 
 export class ScenarioParserOrchestrator {
-  // Dependencies injected via constructor (Validator, Client, Processor, Formatter, Translator, Generator)
+  // Dependencies injected via constructor
 
   async parse(scenario: TestScenario): Promise<ParserResult>;
 }
 ```
 
-**`validator.ts`**
+**`components/validator/validator.logic.ts`**
 
 ```typescript
-import { TestScenario } from './interfaces';
+import { TestScenario } from '../../interfaces';
 
-export function validateScenario(scenario: TestScenario): { isValid: boolean; error?: string };
+// Throws ValidationError on failure
+export function validateScenarioLogic(scenario: TestScenario): void;
 ```
 
-**`mcp-client.ts`**
+**`components/mcp-client/mcp-client.logic.ts`**
 
 ```typescript
-import { McpCommandBase, McpResult } from './interfaces';
+import { McpCommandBase, McpResult } from '../../interfaces';
+// import { handleRetry } from './mcp-retry.logic';
+// import { handleMcpError } from './mcp-error-handler';
 
-export class MCPClient {
-  // Constructor to setup connection details, retry policy
+export class MCPClientLogic {
+  // Constructor to setup connection details
 
-  async executeCommand(command: McpCommandBase): Promise<McpResult>;
+  async executeCommandLogic(command: McpCommandBase): Promise<McpResult>; // Core execution, calls retry/error handlers
 }
 ```
 
-**`result-processor.ts`**
+**`components/result-processor/result-processor.logic.ts`**
 
 ```typescript
-import { McpResult, McpSnapshotResult, SerializableDOMNode, IntermediateStep, TestStep } from './interfaces';
+import { McpResult, SerializableDOMNode, IntermediateStep, TestStep } from '../../interfaces';
 
-export class MCPResultProcessor {
-  parseAndFilterSnapshot(snapshotResult: McpSnapshotResult): SerializableDOMNode; // TBD: Needs exact MCP snapshot format
-  createTestStep(mcpResult: McpResult, intermediateStep: IntermediateStep, newDomState: SerializableDOMNode): TestStep;
+export class ResultProcessorLogic {
+  createTestStepLogic(mcpResult: McpResult, intermediateStep: IntermediateStep, newDomState: SerializableDOMNode): TestStep;
 }
 ```
 
-**`prompt-formatter.ts`**
+**`components/result-processor/dom-parser.ts`**
 
 ```typescript
-import { BrowserStepContext, IntermediateStep } from './interfaces';
-// Assume LLM provider SDK types exist, e.g., LLMPromptPayload, LLMFunctionDefinition
+import { McpSnapshotResult, SerializableDOMNode } from '../../interfaces';
+
+export function parseSnapshotToDOMTree(snapshotResult: McpSnapshotResult): SerializableDOMNode; // TBD: Needs exact MCP snapshot format
+```
+
+**`components/result-processor/dom-filter.ts`**
+
+```typescript
+import { SerializableDOMNode } from '../../interfaces';
+
+export function filterDOMTree(domTree: SerializableDOMNode): SerializableDOMNode; // Returns the minimized tree
+```
+
+**`components/prompt-formatter/prompt-formatter.logic.ts`**
+
+```typescript
+import { BrowserStepContext, IntermediateStep } from '../../interfaces';
 import { LLMPromptPayload, LLMFunctionDefinition } from 'some-llm-sdk'; // Placeholder
+// import { serializeDOMTreeToString } from './dom-serializer'; // Or from utils
 
-export class PromptFormatter {
-  getFunctionDefinition(): LLMFunctionDefinition; // Defines the IntermediateStep structure for function calling
-  formatPrompt(context: BrowserStepContext, userAction: string): LLMPromptPayload;
+export class PromptFormatterLogic {
+  // Load prompt template during initialization
+
+  getFunctionDefinitionLogic(): LLMFunctionDefinition; // Defines IntermediateStep structure
+  formatPromptLogic(context: BrowserStepContext, userAction: string): LLMPromptPayload; // Uses template + context
 }
 ```
 
-**`nl-translator.ts`**
+**`components/nl-translator/nl-translator.logic.ts`**
 
 ```typescript
-import { IntermediateStep } from './interfaces';
-// Assume LLM provider SDK types exist
+import { IntermediateStep } from '../../interfaces';
 import { LLMPromptPayload } from 'some-llm-sdk'; // Placeholder
 
-export class NLToActionTranslator {
+export class NLToActionTranslatorLogic {
   // Constructor takes LLM client instance
 
-  async translate(promptPayload: LLMPromptPayload): Promise<{ step?: IntermediateStep; error?: string }>;
+  async translateLogic(promptPayload: LLMPromptPayload): Promise<{ step?: IntermediateStep; error?: string }>; // Calls LLM, parses function call
 }
 ```
 
-**`command-generator.ts`**
+**`components/command-generator/command-generator.logic.ts`**
 
 ```typescript
-import { IntermediateStep, McpCommandBase } from './interfaces';
+import { IntermediateStep, McpCommandBase } from '../../interfaces';
 
-export class MCPCommandGenerator {
-  generateCommands(intermediateStep: IntermediateStep): McpCommandBase[];
+export class MCPCommandGeneratorLogic {
+  generateCommandsLogic(intermediateStep: IntermediateStep): McpCommandBase[];
 }
 ```
 
@@ -325,7 +369,8 @@ export class MCPCommandGenerator {
 ```typescript
 import { SerializableDOMNode } from '../interfaces';
 
-export function serializeDOMTree(node: SerializableDOMNode): string; // Implements the string conversion logic
+// Potentially move dom-serializer logic here if broadly useful
+export function serializeDOMTreeToString(node: SerializableDOMNode): string;
 // Other utility functions...
 ```
 
@@ -344,21 +389,18 @@ export function serializeDOMTree(node: SerializableDOMNode): string; // Implemen
         *   On Failure: Record `ErrorInfo`. Terminate loop.
 5.  **Finalize:** `Orchestrator` compiles `ParserResult` with accumulated `TestStep` list and status/errors.
 
-## 9. Post-MVP Considerations
+### 8.1. State Management and Data Flow within the Step Loop
 
-*   Handling ambiguous selectors (trying alternatives).
-*   Support for actions beyond navigate, click, input, assert.
-*   Vision model integration for state analysis.
-*   Advanced prompt engineering and token management.
-*   Full self-correction loop integration based on Marathon Engine feedback.
+The core of the process relies on maintaining the correct browser state between steps. Here's a breakdown of how the DOM state flows during the loop processing (Step 4 in the recap):
 
-## 10. Assumptions
+1.  **Initiate Step N:** The `ScenarioParserOrchestrator` starts processing the Nth user action string. It retrieves the **current minimized DOM state** (`SerializableDOMNode` tree) that was stored after the successful completion of step N-1 (or the initial navigation).
+2.  **Format Prompt (Step 4a):** The `Orchestrator` creates a `BrowserStepContext` containing this current minimized DOM state and passes it, along with the Nth action string, to the `PromptFormatter`.
+3.  **Translate & Generate (Steps 4b, 4c):** The `NLToActionTranslator` interprets the action within the provided DOM context, and the `MCPCommandGenerator` creates the necessary MCP command(s).
+4.  **Execute Step N (Step 4d):** The `Orchestrator` instructs the `MCPClient` to execute the command(s) for step N.
+5.  **Receive Result (Step 4d):** If the MCP execution is successful, the `MCPClient` receives a result from the MCP Server which includes the **raw snapshot data** representing the browser state *after* action N was performed.
+6.  **Process Result (Step 4e):** The `Orchestrator` passes this raw result to the `MCPResultProcessor`.
+7.  **Update DOM State (Step 4e):** The `MCPResultProcessor` (using `dom-parser.ts` and `dom-filter.ts`) parses the new raw snapshot data into a **new `SerializableDOMNode` tree** and filters it to create the **new minimized DOM state**.
+8.  **Store New State & TestStep (Step 4e):** The `MCPResultProcessor` returns the validated `TestStep` object for step N *and* the **new minimized DOM state** back to the `Orchestrator`. The `Orchestrator` adds the `TestStep` to its list and **updates its internally stored state** to hold this new minimized DOM representation.
+9.  **Prepare for Next Step:** When the `Orchestrator` begins step N+1, it repeats from point 1, using the minimized DOM state captured and stored at the end of step N.
 
-*   **MCP Playwright Server API:**
-    *   Provides snapshots containing sufficient detail to reconstruct a meaningful DOM representation (tags, key attributes, text).
-    *   Includes reliable hints for element visibility and interactivity (including non-standard interactive elements like divs with listeners).
-    *   Provides stable selectors or identifiers for nodes within the snapshot that can be used reliably in subsequent MCP commands.
-    *   Can return diagnostic information (screenshot, final DOM state) upon command failure when requested.
-    *   API contract (request/response formats) is stable or versioned. (Specific formats marked as **TBD** in interfaces).
-*   **LLM Provider:** Supports robust function calling capabilities for generating structured output (`IntermediateStep`).
-*   **Environment:** TypeScript environment with necessary build tools and dependencies. 
+This ensures that each step's interpretation by the LLM is always based on the state of the browser resulting from the successful execution of the previous step.
