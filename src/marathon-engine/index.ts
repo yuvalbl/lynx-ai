@@ -26,11 +26,8 @@ export class MarathonEngine {
     };
   }
 
-  /**
-   * Gets the context from the last execution.
-   * @returns The last execution context or null if none exists
-   */
-  getLastExecutionContext(): any | null {
+  // TBD: Implement this
+  getLastExecutionContext(): null {
     // Placeholder implementation
     return null;
   }
