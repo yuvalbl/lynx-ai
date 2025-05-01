@@ -32,6 +32,20 @@ alwaysApply: true
   const badExample = false;
   ```
 
+- **Comments:**
+  - Use double slash, do not use asterisk
+    ```typescript
+  // Good comment;
+
+  // Good Long
+  // comment;
+  
+  /* Bad comment */
+  
+  /* Bad Long 
+  comment */
+```
+
 - **Rule Content Guidelines:**
   - Start with high-level overview
   - Include specific, actionable requirements

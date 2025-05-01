@@ -7,7 +7,7 @@
 *   **Details:** Refer to Section 4 and Section 6 of `src/scenario-parser/scenario-parser-tech-spec.md`. Create the main directories (`components`, `interfaces`, `utils`, `prompts`) inside `src/scenario-parser/`. Create the initial interface files (`common.types.ts`, `scenario.types.ts`, `test-step.types.ts`, `mcp.types.ts`, `internal.types.ts`) inside `src/scenario-parser/interfaces/`. Implement the type definitions as specified, leaving TBD comments where necessary. Create placeholder `index.ts` files in components subdirectories and utils.
 *   **Dependencies:** []
 *   **Priority:** high
-*   **Status:** pending
+*   **Status:** done
 *   **Test Strategy:** Verify directory structure exists within `src/scenario-parser/`. Verify interfaces files contain the specified type definitions. Code review for correctness and completeness of interfaces.
 *   **Subtasks:**
     *   **1.1:** Create directory structure (`components`, `interfaces`, `utils`, `prompts`, `tests`, component subdirs).
