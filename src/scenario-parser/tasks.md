@@ -25,7 +25,7 @@
 *   **Details:** Implement the `validateScenarioLogic` function within `src/scenario-parser/components/validator/validator.logic.ts`. It should check for the presence and type of `url` (string) and `actions` (non-empty array of strings). It should throw a `ValidationError` (custom error class recommended) if validation fails, according to the tech spec (Section 7). Export the function via `index.ts`.
 *   **Dependencies:** [1]
 *   **Priority:** high
-*   **Status:** pending
+*   **Status:** done
 *   **Test Strategy:** Unit tests for `validateScenarioLogic` covering valid scenarios, missing URL, missing actions, empty actions array, incorrect types.
 *   **Subtasks:**
     *   **2.1:** Define `ValidationError` custom error class (e.g., in `interfaces/common.types.ts` or a new `errors.ts`).
