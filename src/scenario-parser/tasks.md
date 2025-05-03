@@ -7,7 +7,7 @@
 *   **Details:** Refer to Section 4 and Section 6 of `src/scenario-parser/scenario-parser-tech-spec.md`. Create/update the main directories (`components`, `interfaces`, `utils`, `tests`) inside `src/scenario-parser/`. Create/update the interface files (`common.types.ts`, `scenario.types.ts`, `test-step.types.ts`, `internal.types.ts`) inside `src/scenario-parser/interfaces/`. Implement the type definitions as specified (e.g., enhance `SerializableDOMNode`, add `SelectorMap`, `TabInfo`). Create placeholder `index.ts` files in new component subdirectories (`playwright-bridge`, `dom-processor`, `prompt-builder`, `action-translator`) and utils. Remove `mcp.types.ts`.
 *   **Dependencies:** []
 *   **Priority:** high
-*   **Status:** done (needs update)
+*   **Status:** done
 *   **Test Strategy:** Verify directory structure. Verify interface files contain updated type definitions. Code review.
 *   **Subtasks:**
     *   **1.1:** Create/Update directory structure (add new component dirs, remove old ones if applicable).
