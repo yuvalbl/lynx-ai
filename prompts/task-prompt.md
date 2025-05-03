@@ -13,3 +13,18 @@ If you have any questions - ask them before working on the task
 4. Present me the changes and ask me for review. MAKE SURE YOU FOLLOW CODE AND COMMENTS CONVENTIONS!
 
 5. If I say the task is Done, change the status of the task in the `tasks.md` file to done.
+
+
+Post Task prompts:
+
+1.
+run "npm run lint:fix"
+Then Verify: 
+- All the code you changed / added is following project conventions
+- All comments you've added follow the comment format guidelines
+- No lint error exists (run `npm run lint:fix` if they do)
+- No code / comments leftovers 
+
+2. All `console.log` replaced with Logger instance (as in `logger.ts`) or - removed
+
+3. make sure you update memory bank
