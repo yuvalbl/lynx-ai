@@ -2,38 +2,51 @@ import { TestStepAction, OperationResult } from './'; // Now imports from the ba
 
 // Represents the LLM's interpretation of a natural language action into a structured format.
 export interface IntermediateStep {
-  actionType: TestStepAction | 'unknown'; // Inferred action type
-  targetSelector?: string; // Primary candidate selector identified by LLM
-  inputValue?: string | number | boolean; // Value for input/assert
-  description: string; // Original NL action description
-  isAmbiguous?: boolean; // Flag if LLM detected ambiguity (e.g., multiple targets)
-  confidenceScore?: number; // Optional: LLM confidence (0-1)
-  // TBD: Optional alternativeSelectors?: string[];
-  error?: string; // Error during translation (e.g., unknown action)
+  actionType: TestStepAction | 'unknown' | 'navigate'; // Action type inferred by the LLM
+  targetSelector?: string; // Selector hint provided by LLM (often based on `highlightIndex` from the prompt)
+  inputValue?: string | number | boolean; // Value for 'input' or 'assert' actions
+  url?: string; // Target URL for 'navigate' action
+  description: string; // Original NL action description provided by the user
+  isAmbiguous?: boolean; // Flag if LLM detected ambiguity (e.g., multiple possible targets)
+  confidenceScore?: number; // Optional: LLM confidence score (0-1) for its interpretation
+  // TBD: Optional alternativeSelectors?: string[]; // Potential future enhancement
+  error?: string; // Error message if translation itself failed
 }
 
-// TBD: Review if this interface is necessary or if raw snapshot data + filtering logic suffices.
-// Represents a node in the simplified, serializable DOM tree used for LLM context.
+// Represents a processed node in the DOM tree, enhanced with interaction details.
+// This structure, derived from browser-use patterns, is used internally and formatted for LLM context.
 export interface SerializableDOMNode {
-  tag: string; // e.g., 'button', 'input', 'a', 'div'
-  attributes: Record<string, string>; // Key-value map of *relevant* attributes (id, class, data-*, aria-*, role, type, placeholder, value, etc.)
-  text: string; // Direct text content, potentially truncated or concatenated from children text nodes
-  children: SerializableDOMNode[]; // Child nodes that are also visible/interactive
-  isVisible: boolean; // Based on MCP hint
-  isInteractive: boolean; // Based on MCP hint (e.g., clickable, focusable, inputtable)
+  tag: string; // HTML tag name (e.g., 'button', 'input')
+  attributes: Record<string, string>; // Key-value map of relevant HTML attributes
+  text?: string; // Aggregated text content from direct child text nodes
+  xpath: string; // XPath selector relative to document or nearest frame/shadow root boundary
+  children: SerializableDOMNode[]; // Child nodes
+  parent?: SerializableDOMNode; // Reference to the parent node in the processed tree
 
-  // Converts this node and its relevant children into a concise string
-  // representation suitable for providing context to an LLM.
-  // The LLM uses this context to determine the appropriate action and selector.
-  // Example: `<button id='login' class='btn primary'>Login</button>`
-  // Example: `<input type='text' placeholder='Username' aria-label='User Name'>`
-  // String representation of the node context.
-  toString(): string;
+  // Properties determined by buildDomTree.js & DomProcessorService
+  isVisible: boolean; // Whether the element is considered visible (size, display, visibility CSS)
+  isInteractive: boolean; // Whether the element is considered interactive (clickable, focusable, inputtable, etc.)
+  highlightIndex?: number; // Unique index assigned to visible, interactive, top-most elements for LLM reference
+  isTopElement?: boolean; // Indicates if this element is the effective top-most element at its coordinates, considering potential overlaps (z-index). True if it would receive pointer events (like clicks) at its location, determined using browser checks like `elementFromPoint`. Crucial for identifying truly interactable elements.
+  isInViewport?: boolean; // Whether the element is within the (potentially expanded) viewport
+  shadowRoot?: boolean; // Whether the element hosts a shadow DOM root
+  isNew?: boolean; // Optional: Flag indicating if the element was newly detected compared to the previous state
 }
 
-// Represents the contextual information (DOM, URL, previous result) provided to the prompt formatter.
+// Maps the `highlightIndex` to its corresponding processed DOM node object.
+export type SelectorMap = Record<number, SerializableDOMNode>;
+
+// Contextual information passed between services during the processing of a single step.
 export interface BrowserStepContext {
-  minimizedDOM: SerializableDOMNode; // The filtered DOM tree
-  currentURL?: string; // Only included for navigation or first step
-  previousStepResult?: OperationResult; // Result of the immediately preceding step
+  domTree: SerializableDOMNode; // The structured DOM tree for the current state
+  selectorMap: SelectorMap; // Map from highlight index to node for the current state
+  currentURL: string; // The URL of the browser page for the current state
+  previousStepResult?: OperationResult; // Result of the immediately preceding step (if any)
+}
+
+// Represents basic information about an open browser tab.
+export interface TabInfo {
+  pageIndex: number; // Zero-based index of the tab
+  url: string; // Current URL of the tab
+  title: string; // Current title of the tab
 }

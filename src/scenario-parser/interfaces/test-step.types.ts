@@ -1,18 +1,20 @@
-export type TestStepAction = 'navigate' | 'input' | 'click' | 'assert'; // MVP focuses on first 4 // | 'wait' | 'select' | 'hover' | 'keypress'
+export type TestStepAction = 'navigate' | 'input' | 'click' | 'assert' /* | ... MVP focus */;
 
 export interface TestStepContext {
-  domSnapshot: string; // The raw snapshot data returned by MCP for this step // TBD: Define based on MCP API
-  // TBD: Other potential context fields? Attempt count, errors during MCP step?
+  // Replacing mcpSnapshot with more relevant context
+  domStructureSnapshot: string; // The formatted DOM string provided to the LLM for this step
+  fullDomSnapshot?: unknown; // Optional: Raw JSON/object from buildDomTree.js for debugging
+  // TBD: Other context? Playwright logs? Error details?
 }
 
 export interface TestStep {
   id: string; // Unique identifier (e.g., uuid)
   description: string; // Original user natural language action string
   action: TestStepAction;
-  selector?: string; // The specific selector validated and used by MCP
+  selector?: string; // The specific selector (e.g., XPath) used by Playwright
   value?: string | number | boolean; // Value for 'input' or 'assert' actions
   url?: string; // URL for 'navigate' action
-  context: TestStepContext; // Snapshot and potentially other data from MCP execution
+  context: TestStepContext; // Context specific to this step's execution
   // Optional fields for post-MVP:
   // timeout?: number; // Step-specific timeout
   // waitFor?: 'visible' | 'networkidle' | 'domcontentloaded' | 'load';
