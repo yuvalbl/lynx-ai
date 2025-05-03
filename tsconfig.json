@@ -6,6 +6,12 @@
     "declaration": true,
     "outDir": "dist",
     "rootDir": "src",
+    "baseUrl": "./",
+    "paths": {
+      "@common/*": ["src/common/*"],
+      "@scenario-parser/interfaces": ["src/scenario-parser/interfaces"],
+      "@scenario-parser/interfaces/*": ["src/scenario-parser/interfaces/*"]
+    },
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

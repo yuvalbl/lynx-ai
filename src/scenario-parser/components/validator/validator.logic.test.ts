@@ -1,4 +1,4 @@
-import { TestScenario } from '../../interfaces';
+import { TestScenario, ValidationError } from '@scenario-parser/interfaces';
 import { validateScenarioLogic } from './validator.logic';
 
 describe('Scenario Input Validation', () => {
@@ -32,7 +32,7 @@ describe('Scenario Input Validation', () => {
     // @ts-expect-error - Testing missing property
     delete validScenario.url;
     expect(() => validateScenarioLogic(validScenario)).toThrow(
-      'Scenario "url" must be a non-empty string.',
+      'Scenario must include a valid non-empty starting URL.',
     );
   });
 
@@ -40,25 +40,25 @@ describe('Scenario Input Validation', () => {
     // @ts-expect-error - Testing invalid type
     validScenario.url = 123;
     expect(() => validateScenarioLogic(validScenario)).toThrow(
-      'Scenario "url" must be a non-empty string.',
+      'Scenario must include a valid non-empty starting URL.',
     );
   });
 
   test('should throw if url is an empty string', () => {
     validScenario.url = '';
     expect(() => validateScenarioLogic(validScenario)).toThrow(
-      'Scenario "url" must be a non-empty string.',
+      'Scenario must include a valid non-empty starting URL.',
     );
   });
 
   test('should throw if url is not a valid URL format', () => {
     validScenario.url = 'not-a-valid-url';
     expect(() => validateScenarioLogic(validScenario)).toThrow(
-      /Scenario "url" is not a valid URL:/,
+      new ValidationError(`Invalid URL format: ${validScenario.url}`),
     );
     validScenario.url = 'http://'; // Incomplete
     expect(() => validateScenarioLogic(validScenario)).toThrow(
-      /Scenario "url" is not a valid URL:/,
+      new ValidationError(`Invalid URL format: ${validScenario.url}`),
     );
   });
 
@@ -67,7 +67,7 @@ describe('Scenario Input Validation', () => {
     // @ts-expect-error - Testing missing property
     delete validScenario.actions;
     expect(() => validateScenarioLogic(validScenario)).toThrow(
-      'Scenario "actions" must be an array.',
+      'Scenario must include at least one action string in the actions array.',
     );
   });
 
@@ -75,14 +75,14 @@ describe('Scenario Input Validation', () => {
     // @ts-expect-error - Testing invalid type
     validScenario.actions = 'not-an-array';
     expect(() => validateScenarioLogic(validScenario)).toThrow(
-      'Scenario "actions" must be an array.',
+      'Scenario must include at least one action string in the actions array.',
     );
   });
 
   test('should throw if actions array is empty', () => {
     validScenario.actions = [];
     expect(() => validateScenarioLogic(validScenario)).toThrow(
-      'Scenario "actions" array cannot be empty.',
+      'Scenario must include at least one action string in the actions array.',
     );
   });
 

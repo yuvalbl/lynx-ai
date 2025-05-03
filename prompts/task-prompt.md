@@ -25,6 +25,6 @@ Then Verify:
 - No lint error exists (run `npm run lint:fix` if they do)
 - No code / comments leftovers 
 
-2. All `console.log` replaced with Logger instance (as in `logger.ts`) or - removed
+2. All `console.log` replaced with Logger instance (as in `logger.ts`) or - remove if not needed
 
 3. make sure you update memory bank

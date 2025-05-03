@@ -1,4 +1,4 @@
-import { TestScenario, ValidationError } from '../../interfaces';
+import { TestScenario, ValidationError } from '@scenario-parser/interfaces';
 
 // Throws ValidationError on failure
 export function validateScenarioLogic(scenario: TestScenario): void {
