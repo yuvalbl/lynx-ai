@@ -36,7 +36,7 @@
 *   **Details:** Implement the `PlaywrightBridgeService` class in `src/scenario-parser/components/playwright-bridge/playwright-bridge.service.ts`. Implement methods to connect/launch Playwright, get the active page, navigate, click/type elements (using selectors), evaluate JS, wait for load states, manage tabs, etc., as outlined in the tech spec and plan. Handle Playwright setup and teardown. Requires Playwright configuration.
 *   **Dependencies:** [1] (uses interfaces), `playwright` library.
 *   **Priority:** high
-*   **Status:** pending
+*   **Status:** done
 *   **Test Strategy:** Unit tests mocking Playwright interactions where possible. Integration tests involving launching a real browser instance for key methods (navigate, click, evaluate).
 *   **Subtasks:**
     *   **3.1:** Implement `PlaywrightBridgeService` class structure and constructor (handling config, Playwright setup).
