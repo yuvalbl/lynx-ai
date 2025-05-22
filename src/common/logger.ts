@@ -18,42 +18,39 @@ try {
 const logLevel = process.env.LOG_LEVEL || 'info';
 
 // Custom console format that's easier to read
-const consoleFormat = winston.format.printf(
-  ({ level, message, timestamp, service, ...metadata }) => {
-    // Color coding for log levels
-    const colors: Record<string, string> = {
-      error: '\x1b[31m', // Red
-      warn: '\x1b[33m', // Yellow
-      info: '\x1b[36m', // Cyan
-      debug: '\x1b[32m', // Green
-      verbose: '\x1b[34m', // Blue
-      silly: '\x1b[35m', // Magenta
-      reset: '\x1b[0m', // Reset
-    };
+const consoleFormat = winston.format.printf(({ level, message, timestamp, service, ...metadata }) => {
+  // Color coding for log levels
+  const colors: Record<string, string> = {
+    error: '\x1b[31m', // Red
+    warn: '\x1b[33m', // Yellow
+    info: '\x1b[36m', // Cyan
+    debug: '\x1b[32m', // Green
+    verbose: '\x1b[34m', // Blue
+    silly: '\x1b[35m', // Magenta
+    reset: '\x1b[0m', // Reset
+  };
 
-    const color = colors[level] || colors.reset;
-    const time = new Date(timestamp as string).toLocaleTimeString();
-    const serviceName = service ? `[${service}]` : ''; // Include service name (logger name)
+  const color = colors[level] || colors.reset;
+  const time = new Date(timestamp as string).toLocaleTimeString();
+  const serviceName = service ? `[${service}]` : ''; // Include service name (logger name)
 
-    // Simple metadata formatting
-    const metaString = Object.keys(metadata).length
-      ? ` ${JSON.stringify(metadata)}` // Basic JSON stringify for other metadata
-      : '';
+  // Simple metadata formatting
+  const metaString = Object.keys(metadata).length
+    ? ` ${JSON.stringify(metadata)}` // Basic JSON stringify for other metadata
+    : '';
 
-    // Added check for Error instances within metadata for better stack trace logging
-    let errorStack = '';
-    if (metadata.error instanceof Error && metadata.error.stack) {
-      errorStack = `\n${metadata.error.stack}`;
-      // Optionally remove the error from metaString if you don't want it duplicated
-      // delete metadata.error; // Requires cloning metadata first if modifying
-    }
+  // Added check for Error instances within metadata for better stack trace logging
+  let errorStack = '';
+  if (metadata.error instanceof Error && metadata.error.stack) {
+    errorStack = `\n${metadata.error.stack}`;
+    // Optionally remove the error from metaString if you don't want it duplicated
+    // delete metadata.error; // Requires cloning metadata first if modifying
+  }
 
-    return (
-      `${color}${time} ${serviceName}[${level.toUpperCase()}]${colors.reset}: ` +
-      `${message}${metaString}${errorStack}`
-    );
-  },
-);
+  return (
+    `${color}${time} ${serviceName}[${level.toUpperCase()}]${colors.reset}: ` + `${message}${metaString}${errorStack}`
+  );
+});
 
 // Create a logger instance with a specified name (service).
 // name: Name of the logger/service (used for log file naming and prefix).

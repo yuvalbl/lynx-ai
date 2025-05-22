@@ -18,37 +18,27 @@ describe('Scenario Input Validation', () => {
 
   test('should throw if scenario is null or undefined', () => {
     // @ts-expect-error - Testing invalid input
-    expect(() => validateScenarioLogic(null)).toThrow(
-      'Scenario input cannot be null or undefined.',
-    );
+    expect(() => validateScenarioLogic(null)).toThrow('Scenario input cannot be null or undefined.');
     // @ts-expect-error - Testing invalid input
-    expect(() => validateScenarioLogic(undefined)).toThrow(
-      'Scenario input cannot be null or undefined.',
-    );
+    expect(() => validateScenarioLogic(undefined)).toThrow('Scenario input cannot be null or undefined.');
   });
 
   // URL Validations
   test('should throw if url is missing', () => {
     // @ts-expect-error - Testing missing property
     delete validScenario.url;
-    expect(() => validateScenarioLogic(validScenario)).toThrow(
-      'Scenario must include a valid non-empty starting URL.',
-    );
+    expect(() => validateScenarioLogic(validScenario)).toThrow('Scenario must include a valid non-empty starting URL.');
   });
 
   test('should throw if url is not a string', () => {
     // @ts-expect-error - Testing invalid type
     validScenario.url = 123;
-    expect(() => validateScenarioLogic(validScenario)).toThrow(
-      'Scenario must include a valid non-empty starting URL.',
-    );
+    expect(() => validateScenarioLogic(validScenario)).toThrow('Scenario must include a valid non-empty starting URL.');
   });
 
   test('should throw if url is an empty string', () => {
     validScenario.url = '';
-    expect(() => validateScenarioLogic(validScenario)).toThrow(
-      'Scenario must include a valid non-empty starting URL.',
-    );
+    expect(() => validateScenarioLogic(validScenario)).toThrow('Scenario must include a valid non-empty starting URL.');
   });
 
   test('should throw if url is not a valid URL format', () => {
@@ -89,22 +79,16 @@ describe('Scenario Input Validation', () => {
   test('should throw if any action is not a string', () => {
     // @ts-expect-error - Testing invalid array element type
     validScenario.actions.push(123);
-    expect(() => validateScenarioLogic(validScenario)).toThrow(
-      'Action at index 2 must be a non-empty string.',
-    );
+    expect(() => validateScenarioLogic(validScenario)).toThrow('Action at index 2 must be a non-empty string.');
   });
 
   test('should throw if any action is an empty string', () => {
     validScenario.actions.push('');
-    expect(() => validateScenarioLogic(validScenario)).toThrow(
-      'Action at index 2 must be a non-empty string.',
-    );
+    expect(() => validateScenarioLogic(validScenario)).toThrow('Action at index 2 must be a non-empty string.');
   });
 
   test('should throw if any action is only whitespace', () => {
     validScenario.actions.push('   ');
-    expect(() => validateScenarioLogic(validScenario)).toThrow(
-      'Action at index 2 must be a non-empty string.',
-    );
+    expect(() => validateScenarioLogic(validScenario)).toThrow('Action at index 2 must be a non-empty string.');
   });
 });

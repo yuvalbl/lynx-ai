@@ -10,12 +10,13 @@ If you have any questions - ask them before working on the task
 
 3. Look at the codebase thoroughly, Understand the code related to this task.
 
-4. Present me the changes and ask me for review. MAKE SURE YOU FOLLOW CODE AND COMMENTS CONVENTIONS!
+4. Present me the changes and ask me for review. MAKE SURE YOU FOLLOW CODE AND COMMENTS CONVENTIONS! None of the files should contain "/*"
 
 5. If I say the task is Done, change the status of the task in the `tasks.md` file to done.
 
+====================
 
-Post Task prompts:
+Post Task missions:
 
 1.
 run "npm run lint:fix"

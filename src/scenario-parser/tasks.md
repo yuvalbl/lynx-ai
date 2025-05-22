@@ -54,7 +54,7 @@
 *   **Details:** Implement the `DomProcessorService` class in `src/scenario-parser/components/dom-processor/dom-processor.service.ts`. Implement the `getDomState` method which loads `buildDomTree.js` (from the same directory), calls `PlaywrightBridgeService.evaluate`, parses the resulting JSON, and constructs the `SerializableDOMNode` tree and `SelectorMap`. Requires implementing the parsing/tree-building logic adapted from `browser-use` (`_construct_dom_tree`, `_parse_node`).
 *   **Dependencies:** [1, 3] (uses interfaces, `PlaywrightBridgeService`).
 *   **Priority:** high
-*   **Status:** pending
+*   **Status:** done
 *   **Test Strategy:** Unit tests for the JSON parsing and tree/map construction logic using mock JSON data. Integration tests calling `getDomState` against a live page via `PlaywrightBridgeService`.
 *   **Subtasks:**
     *   **4.1:** Add `buildDomTree.js` to the component directory.
@@ -139,3 +139,6 @@
     *   **9.2:** Enhance error handling paths.
     *   **9.3:** Write integration tests running full scenarios against live sites.
     *   **9.4:** Add code documentation (JSDoc). 
+
+**Future Tasks:**
+* [read about playwright codegen and look what we can take from it - maybe add a recorder?](https://testomat.io/blog/playwright-ai-revolution-in-test-automation/#)

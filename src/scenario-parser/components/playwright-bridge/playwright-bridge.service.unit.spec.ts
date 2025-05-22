@@ -54,13 +54,11 @@ describe('PlaywrightBridgeService (Unit Sanity)', () => {
 
   it('should construct with default config', () => {
     bridgeService = new PlaywrightBridgeService();
-    expect((bridgeService as unknown as PlaywrightBridgeServiceTestAccess).config.browserType).toBe(
-      'chromium',
-    );
+    expect((bridgeService as unknown as PlaywrightBridgeServiceTestAccess).config.browserType).toBe('chromium');
   });
 
   it('should initialize correctly (mocked)', async () => {
-    bridgeService = new PlaywrightBridgeService();
+    bridgeService = new PlaywrightBridgeService({ launchOptions: { headless: true } });
     await bridgeService.initialize();
 
     expect(chromium.launch).toHaveBeenCalledWith({ headless: true });

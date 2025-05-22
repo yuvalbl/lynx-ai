@@ -15,7 +15,7 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    'max-len': ['error', { code: 100, ignoreComments: true, ignoreStrings: true }],
+    'max-len': ['error', { code: 120, ignoreComments: true, ignoreStrings: true }],
   },
   ignorePatterns: ['jest.config.js'],
 }; 

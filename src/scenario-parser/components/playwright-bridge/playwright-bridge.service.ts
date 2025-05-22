@@ -44,7 +44,7 @@ export class PlaywrightBridgeService {
   constructor(config: Partial<PlaywrightBridgeConfig> = {}) {
     this.config = {
       browserType: 'chromium',
-      launchOptions: { headless: true },
+      launchOptions: { headless: false },
       contextOptions: {},
       defaultTimeout: 30000, // Ensure a default number value
       ...config,
@@ -84,9 +84,7 @@ export class PlaywrightBridgeService {
 
   async getPage(): Promise<Page> {
     if (!this.page) {
-      throw new PlaywrightBridgeError(
-        'Playwright Page is not initialized. Call initialize() first.',
-      );
+      throw new PlaywrightBridgeError('Playwright Page is not initialized. Call initialize() first.');
     }
     return this.page;
   }
@@ -255,9 +253,7 @@ export class PlaywrightBridgeService {
     }
     const pages = this.context.pages();
     if (pageIndex < 0 || pageIndex >= pages.length) {
-      throw new PlaywrightBridgeError(
-        `Invalid page index ${pageIndex}. Only ${pages.length} tabs open.`,
-      );
+      throw new PlaywrightBridgeError(`Invalid page index ${pageIndex}. Only ${pages.length} tabs open.`);
     }
     this.page = pages[pageIndex];
     await this.page.bringToFront();
