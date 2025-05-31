@@ -13,6 +13,36 @@ export interface IntermediateStep {
   error?: string; // Error message if translation itself failed
 }
 
+// Coordinate system for element positioning
+export interface Coordinates {
+  x: number;
+  y: number;
+}
+
+export interface CoordinateSet {
+  topLeft: Coordinates;
+  topRight: Coordinates;
+  bottomLeft: Coordinates;
+  bottomRight: Coordinates;
+  center: Coordinates;
+  width: number;
+  height: number;
+}
+
+export interface ViewportInfo {
+  scrollX: number;
+  scrollY: number;
+  width: number;
+  height: number;
+}
+
+// Hash structure for element identification across page states
+export interface HashedDomElement {
+  branchPathHash: string;
+  attributesHash: string;
+  xpathHash: string;
+}
+
 // Represents a processed node in the DOM tree, enhanced with interaction details.
 // This structure, derived from browser-use patterns, is used internally and formatted for LLM context.
 export interface SerializableDOMNode {
@@ -31,17 +61,53 @@ export interface SerializableDOMNode {
   isInViewport?: boolean; // Whether the element is within the (potentially expanded) viewport
   shadowRoot?: boolean; // Whether the element hosts a shadow DOM root
   isNew?: boolean; // Optional: Flag indicating if the element was newly detected compared to the previous state
+
+  // Enhanced features from browser-use
+  pageCoordinates?: CoordinateSet; // Element coordinates relative to the full page
+  viewportCoordinates?: CoordinateSet; // Element coordinates relative to the viewport
+  viewportInfo?: ViewportInfo; // Viewport information when element was captured
+  cssSelector?: string; // Enhanced CSS selector for the element
+  hash?: HashedDomElement; // Hash for tracking element across page states
+}
+
+// History element for tracking DOM changes across page states
+export interface DOMHistoryElement {
+  tagName: string;
+  xpath: string;
+  highlightIndex?: number;
+  entireParentBranchPath: string[]; // Complete path from root to element
+  attributes: Record<string, string>;
+  shadowRoot: boolean;
+  cssSelector?: string;
+  pageCoordinates?: CoordinateSet;
+  viewportCoordinates?: CoordinateSet;
+  viewportInfo?: ViewportInfo;
+  hash: HashedDomElement;
 }
 
 // Maps the `highlightIndex` to its corresponding processed DOM node object.
 export type SelectorMap = Record<number, SerializableDOMNode>;
 
+// Enhanced browser state with history tracking
+export interface BrowserState {
+  url: string;
+  title: string;
+  domTree: SerializableDOMNode;
+  selectorMap: SelectorMap;
+  screenshot?: string; // Base64 encoded screenshot
+  tabs?: TabInfo[];
+  viewportInfo?: ViewportInfo;
+  // History tracking
+  clickableElementsHashes?: Set<string>; // Hashes of clickable elements for change detection
+}
+
 // Contextual information passed between services during the processing of a single step.
 export interface BrowserStepContext {
-  domTree: SerializableDOMNode; // The structured DOM tree for the current state
+  domTree: SerializableDOMNode; // The structured DOM tree
   selectorMap: SelectorMap; // Map from highlight index to node for the current state
   currentURL: string; // The URL of the browser page for the current state
   previousStepResult?: OperationResult; // Result of the immediately preceding step (if any)
+  browserState?: BrowserState; // Full browser state including history
 }
 
 // Represents basic information about an open browser tab.
@@ -49,4 +115,22 @@ export interface TabInfo {
   pageIndex: number; // Zero-based index of the tab
   url: string; // Current URL of the tab
   title: string; // Current title of the tab
+}
+
+// Element processor configuration
+export interface ElementProcessorConfig {
+  includeAttributes: string[];
+  maxDepth: number;
+  maxTextLength: number;
+  viewportExpansion: number;
+  highlightElements: boolean;
+}
+
+// Action execution result with enhanced features
+export interface EnhancedActionResult extends OperationResult {
+  isNew?: boolean; // Whether this is a newly appeared element
+  downloadPath?: string; // Path to downloaded file if action triggered download
+  newTabOpened?: boolean; // Whether action opened a new tab
+  extractedContent?: string; // Content extracted from the action
+  includeInMemory?: boolean; // Whether to include this result in conversation memory
 }

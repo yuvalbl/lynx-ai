@@ -11,7 +11,7 @@ jest.mock('@common/logger', () => ({
 import { Page } from 'playwright';
 import { PlaywrightBridgeService } from '../playwright-bridge/playwright-bridge.service';
 import { DomProcessorService } from './dom-processor.service';
-import { createTestPage } from './test.util';
+import { createTestPage } from '../../test.util';
 
 // Use a longer timeout for these tests as they involve real browser operations
 jest.setTimeout(30000);

@@ -70,7 +70,7 @@
 *   **Details:** Implement `PromptBuilderService` in `prompt-builder.service.ts`. Implement `formatDomForLLM` to serialize the `SerializableDOMNode` tree (from `DomProcessorService`) into the LLM prompt string, prioritizing top-most interactive elements. Implement `createLlmPromptPayload` to assemble the full payload. Implement `NLToActionTranslatorLogic` (largely unchanged logic but uses new payload structure) in `nl-translator.logic.ts` to call the LLM and parse the `IntermediateStep` function call.
 *   **Dependencies:** [1, 4] (uses interfaces, needs DOM state from `DomProcessorService`).
 *   **Priority:** high
-*   **Status:** pending
+*   **Status:** done
 *   **Test Strategy:** Unit tests for `PromptBuilderService` checking prompt string formatting and payload creation. Unit tests for `NLToActionTranslatorLogic` mocking the LLM API response.
 *   **Subtasks:**
     *   **5.1:** Implement `PromptBuilderService.formatDomForLLM` (recursive traversal and formatting logic).
@@ -78,6 +78,23 @@
     *   **5.3:** (If not already done) Implement LLM function definition for `IntermediateStep` (likely within `NLToActionTranslatorLogic` or shared config).
     *   **5.4:** Update/Implement `NLToActionTranslatorLogic.translateLogic` (LLM API call, function call parsing using new payload).
     *   **5.5:** Implement unit tests for prompt building and translation.
+
+**Task 5b: LLM Integration Validation**
+*   **ID:** 5b
+*   **Title:** Validate LLM Integration and End-to-End Prompt Effectiveness
+*   **Description:** Test the implemented PromptBuilder and NLTranslator with real LLM providers to validate prompt effectiveness and IntermediateStep generation quality.
+*   **Details:** Create comprehensive integration tests that make real API calls to LLM providers (OpenAI, Anthropic, Google) to validate that the generated prompts produce high-quality, consistent IntermediateStep objects. Test across multiple test scenarios (login forms, e-commerce interactions, navigation) and measure effectiveness metrics including confidence scores, accuracy rates, and response consistency across providers. Validate error handling with invalid API keys and edge cases.
+*   **Dependencies:** [5] (requires completed PromptBuilderService and NLToActionTranslatorLogic)
+*   **Priority:** high
+*   **Status:** pending
+*   **Test Strategy:** Real LLM API integration tests with effectiveness metrics collection. Cross-provider consistency validation. Edge case and error handling testing.
+*   **Subtasks:**
+    *   **5b.1:** Create end-to-end integration test suite with real OpenAI API calls
+    *   **5b.2:** Validate IntermediateStep generation quality and consistency across test scenarios
+    *   **5b.3:** Test Anthropic Claude integration and cross-provider consistency
+    *   **5b.4:** Implement prompt effectiveness metrics collection and reporting
+    *   **5b.5:** Test error handling scenarios (invalid API keys, impossible requests, long descriptions)
+    *   **5b.6:** Document LLM integration patterns and performance benchmarks
 
 **Task 6: Implement Action Translator Service**
 *   **ID:** 6

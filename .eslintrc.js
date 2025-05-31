@@ -17,5 +17,13 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     'max-len': ['error', { code: 120, ignoreComments: true, ignoreStrings: true }],
   },
-  ignorePatterns: ['jest.config.js'],
+  overrides: [
+    {
+      files: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off',
+      },
+    },
+  ],
+  ignorePatterns: ['jest.config.js', '.eslintrc.js'],
 }; 

@@ -1,6 +1,6 @@
 import { Browser, BrowserContext, Page, chromium } from 'playwright';
 import { BuildDomTreeResult, ElementNodeData, TextNodeData } from './buildDomTree.types';
-import { createTestPage } from './test.util';
+import { createTestPage } from '../../test.util';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const buildDomTreeFunction = require('./buildDomTree.js'); // Points to your main refactored script
